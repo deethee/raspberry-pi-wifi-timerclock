@@ -54,7 +54,17 @@ sudo chmod -R 775 /var/www/html
 
 mkdir /home/pi/heetingsteeringfrontend/
 
-mkdir /home/pi/heetingsteeringfrontend/
+mkdir /home/pi/heetingsteeringconfig/
+
+touch /home/pi/heetingsteeringconfig/timer_weekdays.json
+
+touch /home/pi/heetingsteeringconfig/timer_weekend.json
+
+sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer__weekdays.json
+
+sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer_weekend.json
+
+
 
 
 #copy content of frontend/dist to /var/www/html
