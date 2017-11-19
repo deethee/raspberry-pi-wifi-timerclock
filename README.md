@@ -67,9 +67,9 @@ sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer_weekend.json
 
 # Copy Files
 
-copy content of frontend/dist to /var/www/html
+copy content of heatingfrontend/dist to /var/www/html
 
-copy Spring boot war to /var/lib/tomcat8/webapps/ROOT.war
+copy Spring boot war of heatingbackend/target /var/lib/tomcat8/webapps/ROOT.war
 
 
 # Connections Rapberry Pi with a 2 Channel Relay:
