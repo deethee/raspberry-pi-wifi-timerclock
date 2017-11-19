@@ -47,9 +47,13 @@ sudo chmod -R 775 /var/www/html
 # Connections Rapberry Pi with a 2 Channel Relay:
 
 Raspberry 5v(Pin2) to VCC 2 channel relay
+
 Raspberry GND(Pin6) to GND of 2 channel relay
+
 Raspberry GPIO 04(Pin7) to IN1 of 2 channel relay
+
 RaspbRaspberry GPIO 27(Pin11) to IN2 of 2 channel relay
+
 
 
 
