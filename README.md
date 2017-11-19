@@ -6,9 +6,10 @@ Uses Angular 5 for frontend, Spring Boot as restful Backend, Lighthttpd Webserve
 
 
 
-Not responsible for any damages:
+# I am not not responsible for any damages:
 
 
+#Instructions
 
 Get a Raspberry Pi Zero with a min class 10 sd card
 
@@ -16,7 +17,7 @@ Format SD Card using SD Card Formatter
 
 Download Noobs Raspian Image and copy on SD card. Install Raspian.
 
-Enter the shell commands:
+# Enter the shell commands:
 
 sudo apt-get update
 sudo apt-get upgrade
@@ -41,7 +42,7 @@ sudo chmod -R 775 /var/www/html
 #copy Spring boot war to /var/lib/tomcat8/webapps/ROOT.war
 
 
-Connections Rapberry Pi with a 2 Channel Relay:
+# Connections Rapberry Pi with a 2 Channel Relay:
 
 Raspberry 5v(Pin2) to VCC 2 channel relay
 Raspberry GND(Pin6) to GND of 2 channel relay
