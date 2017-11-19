@@ -1,2 +1,11 @@
-# raspbery-timerclock
-A wifi heating steering for an old Viessmann Trimatik timer clock, uses Angular 5, Spring Boot, Lighthttpd Webserver, Tomcat
+# raspbbery-timerclock
+A wifi heating steering that replaces an old Viessmann Trimatik analogue timer clock.
+
+
+Uses Angular 5 for frontend, Spring Boot as restful Backend, Lighthttpd Webserver for static Angular Files, Tomcat for the Spring Restservices
+
+
+sudo apt-get install tomcat8
+
+
+
