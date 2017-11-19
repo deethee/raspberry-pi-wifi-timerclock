@@ -76,11 +76,15 @@ copy Spring boot war to /var/lib/tomcat8/webapps/ROOT.war
 
 Raspberry 5v(Pin2) to VCC 2 channel relay
 
+
 Raspberry GND(Pin6) to GND of 2 channel relay
+
 
 Raspberry GPIO 04(Pin7) to IN1 of 2 channel relay
 
+
 RaspbRaspberry GPIO 27(Pin11) to IN2 of 2 channel relay
+
 
 
 
