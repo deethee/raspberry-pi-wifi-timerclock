@@ -65,11 +65,11 @@ sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer__weekdays.json
 sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer_weekend.json
 
 
+# Copy Files
 
+copy content of frontend/dist to /var/www/html
 
-#copy content of frontend/dist to /var/www/html
-
-#copy Spring boot war to /var/lib/tomcat8/webapps/ROOT.war
+copy Spring boot war to /var/lib/tomcat8/webapps/ROOT.war
 
 
 # Connections Rapberry Pi with a 2 Channel Relay:
@@ -112,7 +112,7 @@ sudo cp /home/pi/heetingsteeringfrontend/heatingbackend-0.0.1-SNAPSHOT.war /var/
 tail -f /var/lib/tomcat8/logs/catalina.out
 
 
-# Development on Windows PC:
+# Further development on Windows PC:
 
 Install mobaxterm
 
