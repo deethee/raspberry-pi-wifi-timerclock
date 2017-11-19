@@ -17,7 +17,7 @@ Format SD Card using SD Card Formatter
 
 Download Noobs Raspian Image and copy on SD card. Install Raspian.
 
-Get a 2 Channel Octocopler Relay wich handels 2 states
+Get a 2 Channel Octocopler Relay wich handels 2 states (NO (normally open), NC (normally close), GND (Ground)) and has 3 connections per channel
 
 # Enter the shell commands:
 
