@@ -1,0 +1,20 @@
+
+Generelle Heizungseinstellung<br><br>
+
+Montag bis Freitag<br>
+<atom-rangepicker type="weekdays"></atom-rangepicker><br>
+
+Wochenende<br>
+<atom-rangepicker type="weekend"></atom-rangepicker><br><br><br>
+
+Temporär<br><br>
+
+<div *ngIf="message" [innerHtml]="message" style="border:1px solid red"></div><br>
+
+<form form="ngForm" #form (submit)="heatingTimed($event)">
+    <input name="timeOverride" type="time" [(ngModel)]="timeOverride">Heizung an
+    <button type="submit" class="btn btn-primary" >Submit</button>
+</form><br><br><br>
+
+<button (click)="switchHeating(false)">Heizung aus</button>
+<button (click)="switchHeating(true)">Heizung an</button>

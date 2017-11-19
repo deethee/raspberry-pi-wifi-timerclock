@@ -1,0 +1,26 @@
+<table class="table">
+    <tbody>
+        <tr>
+                <ng-container *ngFor="let division of divisions|numberToArray; let h = index">
+            <td [colSpan]=subDivisions (click)="toggleHourSwitch(h)" style="border:1px solid rgb(210, 255, 253); width:40px">{{division}}
+            </td>
+                </ng-container>
+
+        </tr>
+
+
+        <tr style="height:15px">
+                <ng-container *ngFor="let switch of switches; let s = index">
+            <td *ngIf="switches[s].active" (click)="toggleSwitch(s)" style="background-color: rgb(240, 1, 33)">
+            </td>
+            <td *ngIf="!switches[s].active" (click)="toggleSwitch(s)" style="background-color: rgb(47, 0, 255)">
+            </td>
+        </ng-container>
+
+
+
+        </tr>
+
+
+    </tbody>
+</table>
