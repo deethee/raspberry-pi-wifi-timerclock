@@ -9,13 +9,15 @@ Uses Angular 5 for frontend, Spring Boot as restful Backend, Lighthttpd Webserve
 # I am not not responsible for any damages:
 
 
-#Instructions
+# Instructions
 
 Get a Raspberry Pi Zero with a min class 10 sd card
 
 Format SD Card using SD Card Formatter
 
 Download Noobs Raspian Image and copy on SD card. Install Raspian.
+
+Get a 2 Channel Octocopler Relay wich handels 2 states
 
 # Enter the shell commands:
 
@@ -51,8 +53,7 @@ RaspbRaspberry GPIO 27(Pin11) to IN2 of 2 channel relay
 
 
 
-
-Useful commands:
+# Useful commands:
 #Change port for frontend webapp
 sudo nano /etc/lighttpd/lighttpd.conf
 #force reload of frontend webserver
@@ -69,7 +70,7 @@ sudo cp /home/pi/heetingsteeringfrontend/heatingbackend-0.0.1-SNAPSHOT.war /var/
 tail -f /var/lib/tomcat8/logs/catalina.out
 
 
-Development on Windows PC:
+# Development on Windows PC:
 
 Install mobaxterm
 
