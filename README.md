@@ -64,6 +64,11 @@ sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer__weekdays.json
 
 sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer_weekend.json
 
+git clone git://git.drogon.net/wiringPi
+
+cd ~/wiringP
+
+./build
 
 # Copy Files
 
