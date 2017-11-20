@@ -1,4 +1,4 @@
-# raspbbery-timerclock
+# raspberry-timerclock
 A wifi heating steering that replaces an old Viessmann Trimatik analogue timer clock.
 
 
