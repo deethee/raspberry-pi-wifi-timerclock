@@ -1,6 +1,12 @@
 
 package heatingbackend;
 
+
+
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.messaging.handler.annotation.MessageMapping;
+//import org.springframework.messaging.handler.annotation.SendTo;
+//import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -10,6 +16,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import model.MeasureValueType;
+import model.MeasuredValue;
+import model.Message;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,6 +27,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +38,56 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @org.springframework.web.bind.annotation.RestController
 public class Api {
 
+/*	@MessageMapping("/chat")
+	@SendTo("/topic/messages")
+	public Message send(Message message) throws Exception {
+
+	    String time = new SimpleDateFormat("HH:mm").format(new Date());
+	    Message messageOut = new Message();
+	    messageOut.setMessage("this is a test message");
+	    return messageOut;
+	}
+	*/
 	
+	
+	 @RequestMapping("/api/gettimerconfig")
+	 public String getConfigFile( String timeRangeType) {
+              return Api.readConfigFile(timeRangeType);
+    }
+	 
+	 
+	 @RequestMapping("/api/getinfo")
+	 public String getConfigFile( ) {		 
+		 	
+			String t = "\"\"";
+		    String h = "\"\"";
+		    
+			if (HeatingbackendApplication.averageHumidityLastHour != null
+					&& 
+					HeatingbackendApplication.sensorValues.get(HeatingbackendApplication.sensorValues.size()-1).getDate().getTime()
+					>= ( new Date(new Date().getYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours()-1, new Date().getMinutes()).getTime())					
+					
+					){
+				
+		 		t = "\""+Math.round(HeatingbackendApplication.averageTemperatureLastHour * 100)/100 +"°C"+"\"";		 	
+
+		  		h = "\""+Math.round(HeatingbackendApplication.averageHumidityLastHour * 100)/100 +"%"+"\"";
+		 	}
+		 	
+			String i = "\"\"";
+		 	if (HeatingbackendApplication.info != null ){
+		 		i = "\""+HeatingbackendApplication.info+"\"";
+		 	}
+		 	
+			String s = "\"\"";
+		 	if (HeatingbackendApplication.info != null ){
+		 		s = ""+HeatingbackendApplication.overrideUntilSwitch;
+		 	}
+
+		 System.out.println(HeatingbackendApplication.sensorValues.toString());
+            return "{\"temperature\":" + t +",\"humidity\":" + h + ",\"info\":" + i+ ",\"overrideUntilSwitch\":" + s+ ",\"sensorValues\":" + HeatingbackendApplication.sensorValues.toString() + "}";
+    }
+	 
 	
 	@RequestMapping(value="/api/toggleswitch", method = RequestMethod.POST)
 	public @ResponseBody String  toggleSwitch(@RequestBody String body) {
@@ -63,13 +123,10 @@ public class Api {
 			// TODO Auto-generated catch block
 			return e.getMessage();
 		}
-
-
 	}
 
 	@RequestMapping("/api/togglehour")
-	public @ResponseBody String toggleHour(@RequestBody String body) {
-		
+	public @ResponseBody String toggleHour(@RequestBody String body) {		
 		
 		Integer hour;
 		String timeRangeType;
@@ -125,8 +182,9 @@ public class Api {
 			HeatingbackendApplication.overrideDay= new Date(new Date().getYear(), new Date().getMonth(), new Date().getDay());
 			
 			Api.switchHeating(HeatingbackendApplication.overrideState);
-
-		return "Heizung an bis "+new Date(milliseconds);
+		
+			HeatingbackendApplication.info="Heizung an bis "+new Date(milliseconds);
+		return HeatingbackendApplication.info;
 	}
 	
 	
@@ -135,9 +193,10 @@ public class Api {
 			
 		if (Boolean.parseBoolean(isTurnedOnString) == isHeatingRegularyScheduledOnNow()){
 			System.out.println("Warning heating is already " + isTurnedOnString );
-			HeatingbackendApplication.overrideState = null;
-			HeatingbackendApplication.overrideUntilSwitch = null;
-			return "Warnung, die Heizung ist regulär bereits " + (Boolean.parseBoolean(isTurnedOnString) ? "an":"aus" );			
+			//HeatingbackendApplication.overrideState = null;
+			//HeatingbackendApplication.overrideUntilSwitch = null;
+			//HeatingbackendApplication.info="Warnung, die Heizung ist regulär bereits " + (Boolean.parseBoolean(isTurnedOnString) ? "an":"aus" );
+			//return HeatingbackendApplication.info;			
 		}
 	
 		HeatingbackendApplication.overrideState =  Boolean.parseBoolean(isTurnedOnString);
@@ -149,7 +208,7 @@ public class Api {
 
 			Integer nextHigherOnSwitch;
 					
-			if ("weekday".equals(getTimeRangeTypeToday())){
+			if ("weekdays".equals(getTimeRangeTypeToday())){
 				nextHigherOnSwitch = ((TreeSet<Integer>) HeatingbackendApplication.switches).higher(nowSwitch);
 			}else {
 				nextHigherOnSwitch = ((TreeSet<Integer>) HeatingbackendApplication.switchesWeekend).higher(nowSwitch);
@@ -170,7 +229,7 @@ public class Api {
 
 			Integer counter = nowSwitch;
 			Integer nextHigherOnSwitch = null;
-			if ("weekday".equals(getTimeRangeTypeToday())) {
+			if ("weekdays".equals(getTimeRangeTypeToday())) {
 				try {
 					while ((counter + 1) == ((TreeSet<Integer>) HeatingbackendApplication.switches).higher(counter)) {
 						System.out.println("###" + ((TreeSet<Integer>) HeatingbackendApplication.switches).higher(counter));
@@ -207,17 +266,188 @@ public class Api {
 		}
 		
 		HeatingbackendApplication.overrideDay= new Date(new Date().getYear(), new Date().getMonth(), new Date().getDay());		
-		return "Heizung " + (HeatingbackendApplication.overrideState ? "an":"aus")+ " bis " +Api.getDatefromSwitch(HeatingbackendApplication.overrideUntilSwitch+1);
+		HeatingbackendApplication.info = "Heizung " + (HeatingbackendApplication.overrideState ? "an":"aus")+ " bis " +Api.getDatefromSwitch(HeatingbackendApplication.overrideUntilSwitch+1);
+		return HeatingbackendApplication.info;
 	}
 	
-			
+
+	// @Autowired
+	   // private SimpMessagingTemplate template;
+	/*
+	@RequestMapping("/api/sensortemperature")
+	public String setSensorTemperature(@RequestBody double temperature) {		
+
+			HeatingbackendApplication.sensorValues.add(new MeasuredValue(MeasureValueType.TEMPERATURE, temperature));
+			System.out.println("Logging sensor value:" + temperature);
+			Double averageTemperatureLastHour = 0.0;
+			int countMeasuresLastHour=1;
+					
+			for (int i = HeatingbackendApplication.sensorValues.size()-1; i > -1; i--) {
+				if(new Date().getTime()
+						< ( new Date(new Date().getYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours()+1, new Date().getMinutes()).getTime())) {
+					averageTemperatureLastHour = averageTemperatureLastHour +  HeatingbackendApplication.sensorValues.get(i).getValue();
+					countMeasuresLastHour++;
+				}else {
+					break;
+				}
+				
+			}
+			averageTemperatureLastHour = averageTemperatureLastHour / countMeasuresLastHour;
+			if(averageTemperatureLastHour > 25) {
+				switchHeating(false);
+			}else if(averageTemperatureLastHour < 13) {
+				switchHeating(true);
+			}
+			template.convertAndSend("/topic/greetings", "Heizung Durchschnittstemperatur der letzten Stunde beträgt: "+averageTemperatureLastHour +" Anzahl Messungen:" +countMeasuresLastHour);
+
+		return "Heizung Durchschnittstemperatur der letzten Stunde beträgt: "+averageTemperatureLastHour  +" Anzahl Messungen:" +countMeasuresLastHour;
+	}
+	*/		
 	
-	 @RequestMapping("/api/gettimerconfig")
-	 public String getConfigFile( String timeRangeType) {
-               return Api.readConfigFile(timeRangeType);
-     }
+	/* only working with postman
+	@RequestMapping("/api/sensorvalueparams")
+	public String setSensorValueParams(@RequestParam("type") String type, @RequestParam("value") Double value) {		
+
+			HeatingbackendApplication.sensorValues.add(new MeasuredValue(MeasureValueType.TEMPERATURE, value));
+		
+			Double averageTemperatureLastHour = 0.0;
+			int countMeasuresLastHour=0;
+					
+			for (int i = HeatingbackendApplication.sensorValues.size()-1; i > -1; i--) {
+				if(new Date().getTime()
+						< ( new Date(new Date().getYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours()+1, new Date().getMinutes()).getTime())) {
+					averageTemperatureLastHour = averageTemperatureLastHour +  HeatingbackendApplication.sensorValues.get(i).getValue();
+					countMeasuresLastHour++;
+				}else {
+					break;
+				}
+				
+			}
+			averageTemperatureLastHour = averageTemperatureLastHour / countMeasuresLastHour;
+			if(averageTemperatureLastHour > 25) {
+				switchHeating(false);
+			}else if(averageTemperatureLastHour < 13) {
+				switchHeating(true);
+			}
+		
+			return "Heizung Durchschnittstemperatur der letzten Stunde beträgt: "+averageTemperatureLastHour +" Anzahl Messungen:" +countMeasuresLastHour;
+	}
+	*/
+	
+
+
+	
+	@RequestMapping("/api/sensorvalue")
+	public String setSensorValue(@RequestBody String body) {		
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		double temperature = 0;
+		double humidity = 0;
+		try {
+			JsonNode node = mapper.readTree(body);
+		
+			temperature = node.get("temperature").asDouble();
+			humidity = node.get("humidity").asDouble();
+			System.out.println("Logging sensor value temperature:" + temperature +" humidity:"+ humidity +" Total Measures before:"+ HeatingbackendApplication.sensorValues.size());
+			
+			HeatingbackendApplication.sensorValues.add(new MeasuredValue(MeasureValueType.HUMIDITY, humidity));
+			HeatingbackendApplication.sensorValues.add(new MeasuredValue(MeasureValueType.TEMPERATURE, temperature));
+			System.out.println(" Total Measures after:"+ HeatingbackendApplication.sensorValues.size());
+			
+		
+			Double averageTemperatureLastHour = 0.0;
+			int countTemperatureMeasuresLastHour=0;
+					
+			for (int t = HeatingbackendApplication.sensorValues.size()-1; t > -1; t--) {
+				if(
+						HeatingbackendApplication.sensorValues.get(t).getDate().getTime()
+						>= ( new Date(new Date().getYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours()-1, new Date().getMinutes()).getTime())						
+					
+						
+						) {					
+					if (HeatingbackendApplication.sensorValues.get(t).getType().equals(MeasureValueType.TEMPERATURE)) {
+						averageTemperatureLastHour = averageTemperatureLastHour +  HeatingbackendApplication.sensorValues.get(t).getValue();
+						countTemperatureMeasuresLastHour++;
+					}
+				}
+				
+				else {
+					break;
+				}
+				
+			}
+			averageTemperatureLastHour = averageTemperatureLastHour / countTemperatureMeasuresLastHour;
+			if(averageTemperatureLastHour > 24) {
+
+				HeatingbackendApplication.overrideState = false;
+				int switchInOneHoure = Api.getSwitchfromDate(new Date())+4;
+				HeatingbackendApplication.overrideUntilSwitch = switchInOneHoure;	
+				HeatingbackendApplication.overrideDay= new Date(new Date().getYear(), new Date().getMonth(), new Date().getDay());				
+				Api.switchHeating(HeatingbackendApplication.overrideState);			
+				HeatingbackendApplication.info="Heizung aufgrund Temperatur über 24 Grad aus bis "+Api.getDatefromSwitch(switchInOneHoure);
+				
+			}else if(averageTemperatureLastHour < 14) {
+				HeatingbackendApplication.overrideState = true;
+				int switchInOneHoure = Api.getSwitchfromDate(new Date())+4;
+				HeatingbackendApplication.overrideUntilSwitch = switchInOneHoure;	
+				HeatingbackendApplication.overrideDay= new Date(new Date().getYear(), new Date().getMonth(), new Date().getDay());				
+				Api.switchHeating(HeatingbackendApplication.overrideState);			
+				HeatingbackendApplication.info="Heizung aufgrund Temperatur unter 14 Grad an bis "+Api.getDatefromSwitch(switchInOneHoure);
+			}
+			
+			
+
+			Double averageHumidityLastHour = 0.0;
+			int countHumidityMeasuresLastHour=0;
+					
+			for (int h = HeatingbackendApplication.sensorValues.size()-1; h > -1; h--) {
+				if(HeatingbackendApplication.sensorValues.get(h).getDate().getTime()
+						>= ( new Date(new Date().getYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours()-1, new Date().getMinutes()).getTime())) {
+					
+					 if (HeatingbackendApplication.sensorValues.get(h).getType().equals(MeasureValueType.HUMIDITY)) {
+						averageHumidityLastHour = averageHumidityLastHour +  HeatingbackendApplication.sensorValues.get(h).getValue();
+						countHumidityMeasuresLastHour++;
+					}
+				} else {
+					break;
+				}
+				
+			}
+			averageHumidityLastHour = averageHumidityLastHour / countHumidityMeasuresLastHour;
+			if(averageHumidityLastHour > 75) {
+					
+				HeatingbackendApplication.overrideState = true;
+				int switchInOneHoure = Api.getSwitchfromDate(new Date())+4;
+				HeatingbackendApplication.overrideUntilSwitch = switchInOneHoure;	
+				HeatingbackendApplication.overrideDay= new Date(new Date().getYear(), new Date().getMonth(), new Date().getDay());				
+				Api.switchHeating(HeatingbackendApplication.overrideState);			
+				HeatingbackendApplication.info="Heizung aufgrund Feuchtigkeit über 75% an bis "+Api.getDatefromSwitch(switchInOneHoure);
+				
+			}
+			HeatingbackendApplication.averageHumidityLastHour = averageHumidityLastHour;
+			HeatingbackendApplication.averageTemperatureLastHour = averageTemperatureLastHour;
+
+			return "Gemessene Temperatur: " +temperature+" Feuchtigkeit: " + humidity+" Heizung Durchschnittstemperatur der letzten Stunde beträgt: "
+			+averageTemperatureLastHour +" Anzahl Messungen: " +countTemperatureMeasuresLastHour + " Feuchtigkeit: " + averageHumidityLastHour+" Anzahl Messungen: " +countHumidityMeasuresLastHour;
+			
+		}catch (Exception e) {
+			System.out.println(e.getLocalizedMessage());
+			return e.getLocalizedMessage();
+			
+		}
+		
+
+	}
+	
+
 	 
+	 /* Boeblingen weather
 	 
+	 http://samples.openweathermap.org/data/2.5/weather?lat=48.6833&lon=9.0167&appid=2a381eafe17754824673d61f5153d099
+	 */
+	
+	
 	 public static String saveSwitchesToConfigFile(String timeRangeType) {
 		 
 		 System.out.println("trying to save config file");
@@ -258,19 +488,6 @@ public class Api {
 	 
 	 
 	 public static String readConfigFile(String config) {
-		 
-		 /*
-		 
-			List <String> configFileNames = new ArrayList<String>();
-			
-			configFileNames.add("weekdays");	
-			configFileNames.add("weekend");
-			
-			
-			for (String configFileName: configFileNames) {
-
-			}
-		 */
 		 
 		String sCurrentLine = null;
 	
@@ -331,7 +548,7 @@ public class Api {
 							String[] tokens = trimmedContent.split(", ");
 						
 							for(int t = 0; t < tokens.length; t++) {
-								if (configFileName.equals("weekday")) {
+								if (configFileName.equals("weekdays")) {
 									HeatingbackendApplication.switches.add(Integer.parseInt(tokens[t]));
 								}else {
 									HeatingbackendApplication.switchesWeekend.add(Integer.parseInt(tokens[t]));

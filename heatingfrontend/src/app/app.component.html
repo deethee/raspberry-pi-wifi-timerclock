@@ -1,5 +1,5 @@
 
-Generelle Heizungseinstellung<br><br>
+Generelle Heizungseinstellung {{averageTemperatureLasthHour}}&nbsp; {{averageHumidityLasthHour}}<br><br>
 
 Montag bis Freitag<br>
 <atom-rangepicker type="weekdays"></atom-rangepicker><br>
@@ -18,3 +18,10 @@ Temporär<br><br>
 
 <button (click)="switchHeating(false)">Heizung aus</button>
 <button (click)="switchHeating(true)">Heizung an</button>
+
+<div >
+<chart [options]="temperatureChartOptions" style="width: 100% !important;margin: 0 auto;display: block;"></chart>
+</div>
+<div >
+<chart [options]="humidityChartOptions" style="width: 100% !important;margin: 0 auto;display: block;"></chart>
+</div>

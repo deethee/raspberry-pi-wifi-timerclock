@@ -14,6 +14,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import model.MeasuredValue;
+
 @SpringBootApplication
 @EnableScheduling
 public class HeatingbackendApplication {
@@ -22,15 +24,25 @@ public class HeatingbackendApplication {
 	public static SortedSet <Integer> switchesWeekend = new TreeSet<Integer>();
 	
 	
+	public static List <MeasuredValue> sensorValues = new ArrayList<MeasuredValue>();
+
+	
 	public static boolean isHeatingOn = false;
 
 	public static Integer overrideUntilSwitch=null;
 	public static Boolean overrideState=null;
 	public static Date overrideDay=null;
 	
+	public static String info=null;
+	
 	public static String timerConfigPath = "/home/pi/heetingsteeringconfig/";
 
 	public static Date NORMALNIGHTTIME = new Date(new Date().getYear(), new Date().getMonth(), 22);
+	
+	
+	public static Double averageTemperatureLastHour =null;
+	public static Double averageHumidityLastHour=null;
+
 	
 	
 	public static void main(String[] args) {

@@ -1,0 +1,5 @@
+package model;
+
+public enum MeasureValueType {
+	TEMPERATURE, HUMIDITY, FORECASTTEMPERATURE, OUTSIDETEMPERATURE
+}
