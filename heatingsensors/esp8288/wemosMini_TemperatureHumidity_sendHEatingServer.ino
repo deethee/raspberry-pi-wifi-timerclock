@@ -16,8 +16,8 @@ static char humidityTemp[7];
 //#include <ESP326WiFi.h>
 #include <ESP32HTTPClient.h>
 #include <WiFi.h>
-const char* ssid = "UPC9406652";
-const char* password = "300873170473";
+const char* ssid = "xxx";
+const char* password = "xxx";
 
 const char* url = "http://192.168.0.37";
 const int port = 4200;
