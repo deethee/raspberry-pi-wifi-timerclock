@@ -21,9 +21,9 @@ public class HelloWorld {
                         
                            SimpleDriverDataSource ds = new SimpleDriverDataSource();
                     ds.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-                    ds.setUrl("jdbc:postgresql://10.131.154.11:5432/bosch");
-                    ds.setUsername("bosch_db");
-                    ds.setPassword("22P46kN47O8H4GE8wdgM");
+                    ds.setUrl("xxx");
+                    ds.setUsername("xxx");
+                    ds.setPassword("xxx");
                     
                     String sql = "SELECT * FROM public.EQUIPMENTS where id = ?";
 
