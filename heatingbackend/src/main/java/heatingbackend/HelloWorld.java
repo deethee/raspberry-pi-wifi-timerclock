@@ -21,7 +21,7 @@ public class HelloWorld {
                         
                            SimpleDriverDataSource ds = new SimpleDriverDataSource();
                     ds.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-                    ds.setUrl("jdbc:postgresql://xxx");
+                    ds.setUrl("xxx");
                     ds.setUsername("xxx");
                     ds.setPassword("xxx");
                     
