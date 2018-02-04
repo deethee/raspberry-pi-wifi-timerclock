@@ -19,9 +19,15 @@ Temporär<br><br>
 <button (click)="switchHeating(false)">Heizung aus</button>
 <button (click)="switchHeating(true)">Heizung an</button>
 
-<div >
-<chart [options]="temperatureChartOptions" style="width: 100% !important;margin: 0 auto;display: block;"></chart>
+<div>
+    <chart  type="StockChart" [options]="temperatureChartOptions" style="width: 100% !important;margin: 0 auto;display: block;"></chart>
+    </div>
+    <div >
+    <chart type="StockChart" [options]="humidityChartOptions" style="width: 100% !important;margin: 0 auto;display: block;"></chart>
 </div>
-<div >
-<chart [options]="humidityChartOptions" style="width: 100% !important;margin: 0 auto;display: block;"></chart>
-</div>
+
+
+<br><br><br>
+<button (click)="toggleGarageDoor()">Garagentor</button>
+
+
