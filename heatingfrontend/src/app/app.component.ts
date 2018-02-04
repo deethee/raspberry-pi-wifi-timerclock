@@ -164,6 +164,15 @@ switchHeating(doTurnOn: boolean){
     })
 }
 
+toggleGarageDoor(){
+  let headers = new Headers({ 'Content-Type': 'application/json' });
+  let options = new RequestOptions({ headers: headers });
+
+  this.http.post('http://192.168.0.46/toggle',  JSON.stringify( '' ), options ).subscribe(res => { 
+    this.message = res.text();
+  })
+}
+
 
 }
 
