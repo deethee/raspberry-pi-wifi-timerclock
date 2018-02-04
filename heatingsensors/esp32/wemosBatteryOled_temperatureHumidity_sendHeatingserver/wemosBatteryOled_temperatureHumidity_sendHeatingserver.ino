@@ -1,8 +1,8 @@
 #include <HTTPClient.h>
 #include <WiFi.h>
 // Replace with your network credentials
-const char* ssid     = "xxx";
-const char* password = "xxx";
+const char* ssid     = "UPC9406652";
+const char* password = "300873170473";
 
 
 #include "DHT.h"

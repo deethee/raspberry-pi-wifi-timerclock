@@ -1,6 +1,6 @@
 
-const char* ssid = "UPC9406652";
-const char* password = "300873170473";
+const char* ssid = "xxx";
+const char* password = "xxx";
 
 
 #include "DHT.h"
