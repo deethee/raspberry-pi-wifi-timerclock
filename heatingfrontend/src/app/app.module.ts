@@ -15,7 +15,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AtomChartComponent } from './atom-chart.component';
 
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
-import * as highcharts from 'highcharts';
+import * as highcharts from 'highcharts/highstock';
 import { ChartModule } from 'angular2-highcharts';
 
 export function highchartsFactory() {
