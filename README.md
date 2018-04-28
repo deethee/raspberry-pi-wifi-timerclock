@@ -60,13 +60,13 @@ touch /home/pi/heetingsteeringconfig/timer_weekdays.json
 
 touch /home/pi/heetingsteeringconfig/timer_weekend.json
 
-sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer__weekdays.json
+sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer_weekdays.json
 
 sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer_weekend.json
 
 git clone git://git.drogon.net/wiringPi
 
-cd ~/wiringP
+cd ~/wiringPi
 
 ./build
 
