@@ -43,14 +43,6 @@ sudo chown -R www-data:www-data /var/www/html
 
 sudo chmod -R 775 /var/www/html
 
-sudo groupadd www-data
-
-sudo usermod -G www-data -a pi
-
-sudo chown -R www-data:www-data /var/www/html
-
-sudo chmod -R 775 /var/www/html
-
 
 mkdir /home/pi/heetingsteeringfrontend/
 
