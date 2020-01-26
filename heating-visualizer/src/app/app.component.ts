@@ -1,8 +1,15 @@
 import * as THREE from 'three-full';
 
-import { Injectable, ElementRef, OnInit, OnDestroy, NgZone, Component, ViewChild  } from '@angular/core';
-import { analyzeAndValidateNgModules } from '@angular/compiler';
 
+import { Injectable, ElementRef, OnInit, OnDestroy, NgZone, Component, ViewChild  } from '@angular/core';
+
+interface Scheme {
+  mesh?: THREE.Mesh[];
+  path: string;
+  x: number;
+  y: number;
+  z: number;
+}
 
 @Component({
   selector: 'app-root',
@@ -24,6 +31,9 @@ import { analyzeAndValidateNgModules } from '@angular/compiler';
 // npm install @types/webgl2 --save-dev
 // npm install @types/offscreencanvas --save-dev
 
+
+
+
 export class AppComponent implements OnInit, OnDestroy {
 
   private canvas: HTMLCanvasElement;
@@ -37,10 +47,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private frameId: number = null;
 
-  loader3d: THREE.OBJLoader; // GLTFLoader;
+  loaderOBJ: THREE.OBJLoader; // GLTFLoader;
+  loaderGLTF: THREE.GLTFLoader; // GLTFLoader;
+  loaderFBX: THREE.FBXLoader; // GLTFLoader;
   fontLoader: THREE.FontLoader;
-
-
 
   draggable: any[];
   controls: THREE.OrbitControls;
@@ -55,13 +65,23 @@ export class AppComponent implements OnInit, OnDestroy {
   colorsBosh: THREE.Color[];
   materials: THREE.Material[]
 
+
+  schemes: Scheme[] = [{path: 'commercialHeater1.obj', x: 0, y: -0.4, z: 0 },
+  {path: 'commercialHeater2.obj', x: 0, y: -0.4, z: 0 },
+  {path: 'commercialHeater3.obj', x: -100, y: -170, z: -400 }
+];
+  schemeSelected: Scheme;
+
+
   @ViewChild('rendererCanvas', { static: true })
   public rendererCanvas: ElementRef<HTMLCanvasElement>;
 
   constructor(private ngZone: NgZone) {
 
     this.draggable = new Array();
-    this.loader3d = new THREE.OBJLoader();
+    this.loaderOBJ = new THREE.OBJLoader();
+    this.loaderGLTF = new THREE.GLTFLoader();
+    this.loaderFBX = new THREE.FBXLoader();
 
     this.colorsBosh = new Array<THREE.Color>();
     this.materials = new Array<THREE.Material>();
@@ -75,9 +95,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.materials.push(new THREE.MeshPhongMaterial( {color}));
 
     this.geometries.push( new THREE.CylinderGeometry(0.07, 0.07, 0.01, 32));
-
-
-
 
 
   }
@@ -107,7 +124,8 @@ export class AppComponent implements OnInit, OnDestroy {
       const labelContainerElem = document.querySelector('#labels');
       const elem = document.createElement('div');
       elem.setAttribute('id', datapoint.address);
-      elem.innerHTML = datapoint.name + '&nbsp;<span id="value_' + datapoint.address + '">' + datapoint.value + '</span>&nbsp;' + datapoint.unit;
+      elem.innerHTML = datapoint.name + '&nbsp;<span id="value_'
+        + datapoint.address + '">' + datapoint.value + '</span>&nbsp;' + datapoint.unit;
       labelContainerElem.appendChild(elem);
       console.log('constructed');
 
@@ -160,14 +178,44 @@ export class AppComponent implements OnInit, OnDestroy {
     this.lightAmbient = new THREE.AmbientLight( 0x404040, 0.3 );
     this.scene.add(this.lightAmbient);
 
-     // 3d import of commercial heating
-    this.loader3d.load( '../assets/commercialHeater.obj', ( obj ) => {
-      obj.position.y = -0.4;
+
+    this.schemeSelected = this.schemes[0];
+    // 3d import of commercial heating
+    this.loaderOBJ.load( '../assets/' + this.schemeSelected.path, ( obj ) => {
+      obj.position.x = this.schemes[0].x;
+      obj.position.y = this.schemes[0].y;
+      obj.position.z = this.schemes[0].z;
+      obj.name = this.schemes[0].path;
       this.scene.add( obj );
+      this.schemeSelected.mesh = obj;
+
     }, undefined, ( error ) => {
       alert(error);
       console.error( error );
     } );
+
+
+
+
+/*
+    this.loaderFBX.load( '../assets/commercialHeater.fbx', ( fbx ) => {
+      fbx.position.y = -0.4;
+      this.scene.add( fbx );
+    }, undefined, ( error ) => {
+      alert(error);
+      console.error( error );
+    } );
+*/
+
+/*
+    this.loaderGLTF.load( '../assets/scene.gltf', ( gltf ) => {
+      gltf.position.y = -0.4;
+      this.scene.add( gltf.scene );
+    }, undefined, ( error ) => {
+      alert(error);
+      console.error( error );
+    } );
+*/
 
 
     this.loadData();
@@ -260,7 +308,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   updateValue(dpAdress: string, value: number) {
     document.getElementById('value_' + dpAdress).innerHTML = '' + value;
-    //'' +  Number(document.getElementById('value_' + dpAdress).innerHTML) + 1;
+    // '' +  Number(document.getElementById('value_' + dpAdress).innerHTML) + 1;
   }
 
 
@@ -274,4 +322,28 @@ export class AppComponent implements OnInit, OnDestroy {
     this.renderer.setSize( width, height );
   }
 
+  onSchemeChange(event: Event) {
+
+    const newSchemeSelected =  this.schemes.find( scheme => scheme.path === '' + event);
+    console.log('schemeSelected' + newSchemeSelected.path );
+    // 3d import of commercial heating
+    this.loaderOBJ.load( '../assets/' + newSchemeSelected.path, ( obj ) => {
+      obj.position.x = newSchemeSelected.x;
+      obj.position.y = newSchemeSelected.y;
+      obj.position.z = newSchemeSelected.z;
+      obj.name = newSchemeSelected.path;
+      const oldSchemeMesh = this.scene.getObjectByName( this.schemeSelected.path);
+      this.scene.remove( oldSchemeMesh );
+
+      this.scene.add( obj );
+
+      newSchemeSelected.mesh = obj;
+
+      this.schemeSelected = newSchemeSelected;
+
+    }, undefined, ( error ) => {
+      alert(error);
+      console.error( error );
+    } );
+  }
 }
