@@ -4,11 +4,18 @@ import * as THREE from 'three-full';
 import { Injectable, ElementRef, OnInit, OnDestroy, NgZone, Component, ViewChild  } from '@angular/core';
 
 interface Scheme {
-  mesh?: THREE.Mesh[];
   path: string;
-  x: number;
-  y: number;
-  z: number;
+  position: THREE.Vector3;
+  datapoints: Datapoint[];
+  mesh?: THREE.Mesh[];
+}
+
+interface Datapoint {
+  address: string;
+  label: string;
+  value: number;
+  unit: string;
+  graphPosition: THREE.Vector3;
 }
 
 @Component({
@@ -32,8 +39,6 @@ interface Scheme {
 // npm install @types/offscreencanvas --save-dev
 
 
-
-
 export class AppComponent implements OnInit, OnDestroy {
 
   private canvas: HTMLCanvasElement;
@@ -42,8 +47,6 @@ export class AppComponent implements OnInit, OnDestroy {
   private scene: THREE.Scene;
   private lightDirectional: THREE.directionalLight;
   private lightAmbient: THREE.AmbientLight;
-
-  private circle: THREE.Mesh;
 
   private frameId: number = null;
 
@@ -54,23 +57,20 @@ export class AppComponent implements OnInit, OnDestroy {
 
   draggable: any[];
   controls: THREE.OrbitControls;
-
   mouseDragControls: THREE.DragControls;
 
-  datapoints: any;
-
+  // arrays of default colors/materials/geometry
   geometries: THREE.Geometry[];
   // geometry with texture
-  datapointMeshes: THREE.Mesh[];
   colorsBosh: THREE.Color[];
-  materials: THREE.Material[]
+  materials: THREE.Material[];
 
-
-  schemes: Scheme[] = [{path: 'commercialHeater1.obj', x: 0, y: -0.4, z: 0 },
-  {path: 'commercialHeater2.obj', x: 0, y: -0.4, z: 0 },
-  {path: 'commercialHeater3.obj', x: -100, y: -170, z: -400 }
-];
+  schemes: Scheme[];
   schemeSelected: Scheme;
+
+  datapointMeshesParent: THREE.Object3D;
+  datapointMeshes: THREE.Mesh;
+
 
 
   @ViewChild('rendererCanvas', { static: true })
@@ -86,54 +86,146 @@ export class AppComponent implements OnInit, OnDestroy {
     this.colorsBosh = new Array<THREE.Color>();
     this.materials = new Array<THREE.Material>();
     this.geometries = new Array<THREE.Geometry>();
-    this.datapointMeshes = new Array<THREE.Mesh>();
+
+
 
     const color = new THREE.Color( 'green' );
-    this.colorsBosh.push(color); // TODO pushing not working
-
+    // TODO pushing not working: this.colorsBosh.push(color);
 
     this.materials.push(new THREE.MeshPhongMaterial( {color}));
 
     this.geometries.push( new THREE.CylinderGeometry(0.07, 0.07, 0.01, 32));
 
+  }
+
+
+  loadData(schemeIndex: number) {
+
+    this.schemes = [
+
+      {
+        path: 'commercialHeater1.obj',
+        position: { x: 0, y: -0.4, z: 0 },
+        datapoints: [
+
+          { address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1001', label: 'Vorlauftemperatur', value: 86, unit: '°C', graphPosition: { x: -2.7, y: 2.5, z: 0 } },
+          { address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1002', label: 'Rücklauflauftemperatur', value: 66, unit: '°C', graphPosition: { x: -0.2, y: 2.5, z: 0 } },
+          { address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1003', label: 'Leistung', value: 230, unit: 'KW', graphPosition: { x: 2, y: 1.7, z: 0 } }
+        ]
+      },
+      {
+        path: 'commercialHeater2.obj',
+        position: { x: 0, y: -0.4, z: 0 },
+        datapoints: [
+          { address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1001', label: 'Vorlauftemperatur', value: 86, unit: '°C', graphPosition: { x: -2.7, y: 2.5, z: 0 } },
+          { address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1002', label: 'Rücklauflauftemperatur', value: 66, unit: '°C', graphPosition: { x: -0.2, y: 2.5, z: 0 } },
+          { address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1003', label: 'Leistung', value: 230, unit: 'KW', graphPosition: { x: 0.5, y: 1.7, z: 0 } }
+        ]
+      },
+      {
+        path: 'commercialHeater3.obj',
+        position: { x: -100, y: -170, z: -400 },
+        datapoints: [
+          { address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1001', label: 'Vorlauftemperatur', value: 86, unit: '°C', graphPosition: { x: -220.7, y: 2.5, z: -400 } },
+          { address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1002', label: 'Rücklauflauftemperatur', value: 66, unit: '°C', graphPosition: { x: -0.2, y: 2.5, z: -400 } },
+          { address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1003', label: 'Leistung', value: 230, unit: 'KW', graphPosition: { x: 2, y: -100, z: -400 } }
+        ]
+      }
+
+    ];
+
+
+
+    this.schemeSelected = this.schemes[0];
+    // 3d import of commercial heating
+    this.loaderOBJ.load( '../assets/' + this.schemeSelected.path, ( obj ) => {
+      obj.position.x = this.schemes[0].position.x;
+      obj.position.y = this.schemes[0].position.y;
+      obj.position.z = this.schemes[0].position.z;
+      obj.name = this.schemes[0].path;
+      this.scene.add( obj );
+      this.schemeSelected.mesh = obj;
+
+    }, undefined, ( error ) => {
+      alert(error);
+      console.error( error );
+    } );
+
+    this.placeLabels(0);
+
+/*
+    this.loaderFBX.load( '../assets/commercialHeater.fbx', ( fbx ) => {
+      fbx.position.y = -0.4;
+      this.scene.add( fbx );
+    }, undefined, ( error ) => {
+      alert(error);
+      console.error( error );
+    } );
+*/
+
+/*
+    this.loaderGLTF.load( '../assets/scene.gltf', ( gltf ) => {
+      gltf.position.y = -0.4;
+      this.scene.add( gltf.scene );
+    }, undefined, ( error ) => {
+      alert(error);
+      console.error( error );
+    } );
+*/
+
+
+    this.subscribeWS();
 
   }
 
 
-  loadData() {
-    this.datapoints =   [
-      {address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1001', name: 'Vorlauftemperatur', value: 86, unit: '°C', x: -2.7, y: 2.5, z: 0 } ,
-      {address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1002', name: 'Rücklauflauftemperatur', value: 66, unit: '°C', x: -0.2, y: 2.5, z: 0 },
-      {address: '.1.3.6.1.4.1.8284.2.1.3.1.11.1.4.1003', name: 'Leistung', value: 230, unit: 'KW', x: 2, y: 1.7, z: 0 }
-    ];
+   // place html labels with cylinder mesh
+   placeLabels(schemeIndex: number) {
 
-    for (let datapoint of this.datapoints) {
+    const oldDatapointMeshesParent = this.scene.getObjectByName( 'datapointMeshesParent');
+    this.scene.remove( oldDatapointMeshesParent );
 
-      let dpMesh = new THREE.Mesh( this.geometries[0], this.materials[0] );
+    let parentHtml = document.getElementById('labels');
+    while (parentHtml.firstChild) {
+      parentHtml.firstChild.remove();
+    }
 
-      dpMesh.position.x = datapoint.x;
-      dpMesh.position.y = datapoint.y;
-      dpMesh.position.z = datapoint.z;
-      dpMesh.rotation.x =  Math.PI / 2;
 
-      this.datapointMeshes.push( dpMesh );
-      this.scene.add(dpMesh);
+    // the cylinders to place
+    this.datapointMeshesParent = new THREE.Object3D();
+    this.datapointMeshesParent.name = 'datapointMeshesParent';
+    this.datapointMeshes = new Array<THREE.Mesh>();
+
+
+
+    for (const datapoint of this.schemes[schemeIndex].datapoints) {
+
+      const dpMesh = new THREE.Mesh(this.geometries[0], this.materials[0]);
+
+      dpMesh.position.x = datapoint.graphPosition.x;
+      dpMesh.position.y = datapoint.graphPosition.y;
+      dpMesh.position.z = datapoint.graphPosition.z;
+      dpMesh.rotation.x = Math.PI / 2;
+
+      this.datapointMeshes.push(dpMesh);
       this.draggable.push(dpMesh);
+      this.datapointMeshesParent.add(dpMesh);
 
       // datapoint labels are html elements
       const labelContainerElem = document.querySelector('#labels');
       const elem = document.createElement('div');
       elem.setAttribute('id', datapoint.address);
-      elem.innerHTML = datapoint.name + '&nbsp;<span id="value_'
-        + datapoint.address + '">' + datapoint.value + '</span>&nbsp;' + datapoint.unit;
+      elem.setAttribute('class', 'datapoint-labels');
+      elem.innerHTML = datapoint.label + '&nbsp;<span id="value_'
+                          + datapoint.address + '">' + datapoint.value + '</span>&nbsp;' + datapoint.unit;
       labelContainerElem.appendChild(elem);
       console.log('constructed');
-
     }
-    this.subscribeWS();
+
+    this.scene.add(this.datapointMeshesParent);
+
 
   }
-
 
   ngOnInit() {
     this.createScene(this.rendererCanvas);
@@ -179,46 +271,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.scene.add(this.lightAmbient);
 
 
-    this.schemeSelected = this.schemes[0];
-    // 3d import of commercial heating
-    this.loaderOBJ.load( '../assets/' + this.schemeSelected.path, ( obj ) => {
-      obj.position.x = this.schemes[0].x;
-      obj.position.y = this.schemes[0].y;
-      obj.position.z = this.schemes[0].z;
-      obj.name = this.schemes[0].path;
-      this.scene.add( obj );
-      this.schemeSelected.mesh = obj;
-
-    }, undefined, ( error ) => {
-      alert(error);
-      console.error( error );
-    } );
-
-
-
-
-/*
-    this.loaderFBX.load( '../assets/commercialHeater.fbx', ( fbx ) => {
-      fbx.position.y = -0.4;
-      this.scene.add( fbx );
-    }, undefined, ( error ) => {
-      alert(error);
-      console.error( error );
-    } );
-*/
-
-/*
-    this.loaderGLTF.load( '../assets/scene.gltf', ( gltf ) => {
-      gltf.position.y = -0.4;
-      this.scene.add( gltf.scene );
-    }, undefined, ( error ) => {
-      alert(error);
-      console.error( error );
-    } );
-*/
-
-
-    this.loadData();
+    this.loadData(0);
 
 
     // drag and drop datapoints
@@ -286,12 +339,12 @@ export class AppComponent implements OnInit, OnDestroy {
       console.log('tempVector:' + tempVector.y + 'this.canvas.clientHeight' + this.canvas.clientHeight);
       // convert the normalized position to CSS coordinates
       const x = (tempVector.x *  .5 + .5) * this.canvas.clientWidth
-                  + (document.getElementById(this.datapoints[ndx].address).offsetWidth / 2) + 20;
+                  + (document.getElementById(this.schemeSelected.datapoints[ndx].address).offsetWidth / 2) + 20;
 
       const y = (tempVector.y * -.5 + .5) * this.canvas.clientHeight;
 
       // move the elem to that position
-      document.getElementById(this.datapoints[ndx].address).style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
+      document.getElementById(this.schemeSelected.datapoints[ndx].address).style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
       console.log('x:' + x + '  y:' + y);
     });
   }
@@ -325,25 +378,40 @@ export class AppComponent implements OnInit, OnDestroy {
   onSchemeChange(event: Event) {
 
     const newSchemeSelected =  this.schemes.find( scheme => scheme.path === '' + event);
-    console.log('schemeSelected' + newSchemeSelected.path );
+    console.log('schemeSelected:' + newSchemeSelected.path );
+
     // 3d import of commercial heating
-    this.loaderOBJ.load( '../assets/' + newSchemeSelected.path, ( obj ) => {
-      obj.position.x = newSchemeSelected.x;
-      obj.position.y = newSchemeSelected.y;
-      obj.position.z = newSchemeSelected.z;
-      obj.name = newSchemeSelected.path;
+    if ( typeof newSchemeSelected.mesh === 'undefined' ) {
+      this.loaderOBJ.load( '../assets/' + newSchemeSelected.path, ( obj ) => {
+        obj.position.x = newSchemeSelected.position.x;
+        obj.position.y = newSchemeSelected.position.y;
+        obj.position.z = newSchemeSelected.position.z;
+        obj.name = newSchemeSelected.path;
+        const oldSchemeMesh = this.scene.getObjectByName( this.schemeSelected.path);
+        this.scene.remove( oldSchemeMesh );
+
+        this.scene.add( obj );
+
+        newSchemeSelected.mesh = obj;
+
+        this.schemeSelected = newSchemeSelected;
+
+        this.placeLabels(this.schemes.findIndex( scheme => scheme.path === '' + event)) ;
+
+      }, undefined, ( error ) => {
+        alert(error);
+        console.error( error );
+      } );
+    } else {
+
       const oldSchemeMesh = this.scene.getObjectByName( this.schemeSelected.path);
       this.scene.remove( oldSchemeMesh );
 
-      this.scene.add( obj );
-
-      newSchemeSelected.mesh = obj;
+      this.scene.add( newSchemeSelected.mesh );
 
       this.schemeSelected = newSchemeSelected;
+      this.placeLabels(this.schemes.findIndex( scheme => scheme.path === '' + event)) ;
 
-    }, undefined, ( error ) => {
-      alert(error);
-      console.error( error );
-    } );
+    }
   }
 }

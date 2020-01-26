@@ -1,11 +1,8 @@
 
 <select style="position: absolute; ;padding:10px;margin:10px;" (change)="onSchemeChange($event.target.value)">
-
-
-
-<ng-container *ngFor="let scheme of schemes">
-    <option [value]="scheme.path">{{scheme.path}}</option>
-</ng-container>
+  <ng-container *ngFor="let scheme of schemes">
+      <option [value]="scheme.path">{{scheme.path}}</option>
+  </ng-container>
 </select>
 <div class="engine-wrapper">
   <canvas #rendererCanvas id="renderCanvas"></canvas>
