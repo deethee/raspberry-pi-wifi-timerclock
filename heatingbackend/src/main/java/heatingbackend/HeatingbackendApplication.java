@@ -52,7 +52,7 @@ public class HeatingbackendApplication {
 		System.out.println("--------------------main started --------------------------");
 		
 
-		Api.configFilesToSwitches();
+		//TODO is this needed it is done twice//Api.configFilesToSwitches();
 		
 		SpringApplication.run(HeatingbackendApplication.class, args);
 		

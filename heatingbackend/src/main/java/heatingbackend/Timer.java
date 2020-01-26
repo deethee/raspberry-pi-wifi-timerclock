@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+//TODO to activate raspberry heating uncomment//
 @Component
 public class Timer {
 
@@ -17,7 +18,8 @@ public class Timer {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    @Scheduled(fixedRate = 60000)
+  //TODO to activate raspberry heating uncomment//
+  @Scheduled(fixedRate = 60000)
     public void reportCurrentTime() {        
         
     	log.info("The time is now {}", dateFormat.format(new Date()));
