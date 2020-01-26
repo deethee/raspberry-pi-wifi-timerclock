@@ -94,7 +94,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.materials.push(new THREE.MeshPhongMaterial( {color}));
 
-    this.geometries.push( new THREE.CylinderGeometry(0.07, 0.07, 0.01, 32));
+    this.geometries.push( new THREE.SphereGeometry(0.065, 32, 32));
 
   }
 
@@ -264,10 +264,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.scene.add(this.camera);
 
     // lights
-    this.lightDirectional = new THREE.DirectionalLight( 0x404040 );
+    this.lightDirectional = new THREE.DirectionalLight( 0x404040, 1.5 );
     this.lightDirectional.position.z = 6;
     this.scene.add(this.lightDirectional);
-    this.lightAmbient = new THREE.AmbientLight( 0x404040, 0.3 );
+    this.lightAmbient = new THREE.AmbientLight( 0x404040, 0.6 );
+    this.lightAmbient.y = 20;
     this.scene.add(this.lightAmbient);
 
 
