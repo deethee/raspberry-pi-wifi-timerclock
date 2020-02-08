@@ -1,4 +1,4 @@
-# raspberry-timerclock
+﻿# raspberry-timerclock
 A wifi heating steering that replaces an old Viessmann Trimatik analogue timer clock.
 
 
@@ -45,22 +45,22 @@ sudo chmod -R 775 /var/www/html
 
 
 mkdir /home/pi/heetingsteeringfrontend/
-
 mkdir /home/pi/heetingsteeringconfig/
 
 touch /home/pi/heetingsteeringconfig/timer_weekdays.json
-
 touch /home/pi/heetingsteeringconfig/timer_weekend.json
-
 sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer_weekdays.json
-
 sudo chown tomcat8:tomcat8  /home/pi/heetingsteeringconfig/timer_weekend.json
 
 git clone git://git.drogon.net/wiringPi
-
 cd ~/wiringPi
-
 ./build
+
+
+sudo apt-get install pi4j
+sudo usermod -a -G gpio tomcat
+
+
 
 # Copy Files
 
@@ -73,15 +73,11 @@ copy Spring boot war of heatingbackend/target /var/lib/tomcat8/webapps/ROOT.war
 
 Raspberry 5v(Pin2) to VCC 2 channel relay
 
-
 Raspberry GND(Pin6) to GND of 2 channel relay
-
 
 Raspberry GPIO 04(Pin7) to IN1 of 2 channel relay
 
-
 RaspbRaspberry GPIO 27(Pin11) to IN2 of 2 channel relay
-
 
 
 
@@ -145,5 +141,7 @@ cd angular-frontend
 ng serve
 
 http://localhost:4200
+
+ng build --prod
 
 

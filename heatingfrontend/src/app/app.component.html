@@ -1,13 +1,13 @@
 
 Generelle Heizungseinstellung {{averageTemperatureLasthHour}}&nbsp; {{averageHumidityLasthHour}}<br><br>
 
-Montag bis Freitag<br>
+Montag bis Donnerstag<br>
 <atom-rangepicker type="weekdays"></atom-rangepicker><br>
 
-Wochenende<br>
+Freitag bis Sonntag<br>
 <atom-rangepicker type="weekend"></atom-rangepicker><br><br><br>
 
-Temporär<br><br>
+Temporäre Heizungseinstellung<br><br>
 
 <div *ngIf="message" [innerHtml]="message" style="border:1px solid red"></div><br>
 
@@ -18,16 +18,15 @@ Temporär<br><br>
 
 <button (click)="switchHeating(false)">Heizung aus</button>
 <button (click)="switchHeating(true)">Heizung an</button>
+<button (click)="toggleGarageDoor()">Garagentor</button>
 
-<div>
-    <chart  type="StockChart" [options]="temperatureChartOptions" style="width: 100% !important;margin: 0 auto;display: block;"></chart>
-    </div>
-    <div >
-    <chart type="StockChart" [options]="humidityChartOptions" style="width: 100% !important;margin: 0 auto;display: block;"></chart>
+<div  *ngFor="let chart of charts">
+    <chart type="StockChart" [options]="chart.chartOptions" style="width: 100% !important;margin: 0 auto;display: block;"></chart>
 </div>
 
 
+
 <br><br><br>
-<button (click)="toggleGarageDoor()">Garagentor</button>
+
 
 

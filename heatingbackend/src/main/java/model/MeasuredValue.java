@@ -6,19 +6,19 @@ import heatingbackend.HeatingbackendApplication;
 
 public class MeasuredValue {
 	
-	private MeasureValueType type;
+	private String type;
 	private Double value; 
 	private Date date;
 	
-	public MeasuredValue(MeasureValueType type, double value) {
+	public MeasuredValue(String type, double value) {
 		this.type = type;
 		this.value = value;
 		this.date = new Date();
 	}
-	public MeasureValueType getType() {
+	public String getType() {
 		return type;
 	}
-	public void setType(MeasureValueType type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 	public Double getValue() {

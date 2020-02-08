@@ -1,3 +1,4 @@
 /.metadata/
 heatingsensors/arduino_secrets.h
 heatingsensors/arduino_secrets_dad.h
+heatingsensors/esp32/wemosBatteryOled_HeatingClient_Alarm/arduino_secrets.h

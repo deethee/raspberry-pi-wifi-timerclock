@@ -36,6 +36,7 @@ public class HeatingbackendApplication {
 	public static String info=null;
 	
 	public static String timerConfigPath = "/home/pi/heetingsteeringconfig/";
+	// PC: public static String timerConfigPath = "c:\\home\\pi\\heetingsteeringconfig\\";
 
 	public static Date NORMALNIGHTTIME = new Date(new Date().getYear(), new Date().getMonth(), 22);
 	

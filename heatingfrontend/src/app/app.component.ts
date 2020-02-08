@@ -10,7 +10,7 @@ import { Time } from '@angular/common/src/i18n/locale_data_api';
 import 'rxjs/operators/map';
 import { Subject, Observable, Subscription } from 'rxjs/Rx';
 
-import { ChartModule } from 'angular2-highcharts'; 
+import { ChartModule, ChartSeriesComponent } from 'angular2-highcharts';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +19,8 @@ import { ChartModule } from 'angular2-highcharts';
 })
 export class AppComponent implements OnInit {
 
+  public static overrideUntilSwitch: number;
+  public static localhostString = 'localhost';
 
   title = 'app';
 
@@ -32,153 +34,156 @@ export class AppComponent implements OnInit {
   private sentMessage: string;
 
   timeOverride: Time;
-  public static overrideUntilSwitch:number;
-  message: string='';
+
+  message = '';
 
 
 
+  graphNames: Set<string>;
+  charts: Chart[];
 
-  public static localhostString:string = 'localhost';
-  constructor(private http:Http
-    //, websocketService: WebsocketService
+  constructor(private http: Http
+    // , websocketService: WebsocketService
   ) {
    // this.socket = websocketService.createWebsocket();
 
 
-   let headers = new Headers();
+   const headers = new Headers();
    headers.append('Content-Type', 'application/json');
 
-   let params = new URLSearchParams();
+   const params = new URLSearchParams();
 
 
-   let dataPointsTemp: Array<number[]>;
+
    let dataPointsHumidity: Array<number[]>;
 
-   this.http.get('http://'+ AppComponent.localhostString +':8080/api/getinfo/', { headers: headers, search: params } )
+   this.http.get('http://' + AppComponent.localhostString + ':8080/api/getinfo/', { headers: headers, search: params } )
    .map(res => res.json())
    .subscribe(val => {
-    console.log('info:'+val.temperature);
-    this.averageTemperatureLasthHour =val.temperature;
-    this.averageHumidityLasthHour =val.humidity;
-    this.message =val.info;
+    console.log('info:' + val.temperature);
+    this.averageTemperatureLasthHour = val.temperature;
+    this.averageHumidityLasthHour = val.humidity;
+    this.message = val.info;
     AppComponent.overrideUntilSwitch = val.overrideUntilSwitch;
-    dataPointsTemp = new Array<number[]>();
+
     dataPointsHumidity = new Array<number[]>();
-    let sensValues: SensorValue[] = val.sensorValues;
-    //JSON.parse(val.sensorValues);
+    const sensValues: SensorValue[] = val.sensorValues;
+    // JSON.parse(val.sensorValues);
 
-    for (let s=0; s < sensValues.length; s++ ){
-      let timeStampValuePair: number[] = new Array<number>();
-      timeStampValuePair.push(sensValues[s].date);
-      timeStampValuePair.push(sensValues[s].value);
-      if(sensValues[s].type === 'TEMPERATURE'){
-        dataPointsTemp.push(timeStampValuePair);
+    this.graphNames = new Set<string>();
+    sensValues.forEach(element => {
+      this.graphNames.add(element.type);
+    });
+    this.charts = new Array<Chart>();
+     this.graphNames.forEach(graphName => {
+       console.log('sensorvalues for: ' + graphName);
+      const dataPoints: Array<number[]> = new Array<number[]>();
+
+
+
+       for (let s = 0; s < sensValues.length; s++) {
+         if (sensValues[s].type === graphName) {
+           const timeStampValuePair: number[] = new Array<number>();
+           timeStampValuePair.push(sensValues[s].date);
+           timeStampValuePair.push(sensValues[s].value);
+           dataPoints.push(timeStampValuePair);
+         }
+
+        console.log(this.charts.length);
+
       }
-      if(sensValues[s].type === 'HUMIDITY'){
-        dataPointsHumidity.push(timeStampValuePair);
-      }
-    }
 
-    this.temperatureChartOptions = {
-      title : { text : 'Temperatur' },
-      series: [{
-          data: dataPointsTemp,
-      }],
-      xAxis: {
-        type: 'datetime',
-        events: {
-            afterSetExtremes: function(event) {
-               var date = new Date(event.min);
-                var datevalues = date.getFullYear()
-                +'-'+ date.getMonth()+1
-                +'-'+ date.getDate()
-                +' '+ date.getUTCHours()
-                +':'+ date.getMinutes()
-                +':'+ date.getSeconds();
-               
-            }
-        }
-    },
-  };
+      this.charts.push( {
+        name: graphName,
+         chartOptions : {
+           title: { text: graphName },
+           series: [{
+             data: dataPoints,
+           }],
+           xAxis: {
+             type: 'datetime',
+             events: {
+               afterSetExtremes: function (event) {
+                 var date = new Date(event.min);
+                 var datevalues = date.getFullYear()
+                   + '-' + date.getMonth() + 1
+                   + '-' + date.getDate()
+                   + ' ' + date.getUTCHours()
+                   + ':' + date.getMinutes()
+                   + ':' + date.getSeconds();
 
-  this.humidityChartOptions = {
-    title : { text : 'Feuchtigkeit' },
-    series: [{
-        data: dataPointsHumidity,
-    }],
-    xAxis: {
-      type: 'datetime',
-      events: {
-          afterSetExtremes: function(event) {
-             var date = new Date(event.min);
-              var datevalues = date.getFullYear()
-              +'-'+ date.getMonth()+1
-              +'-'+ date.getDate()
-              +' '+ date.getUTCHours()
-              +':'+ date.getMinutes()
-              +':'+ date.getSeconds();
-             
-          }
-      }
-  },
-};
+               }
+             }
+           },
+         }
+        });
 
-  });
+     });
+console.log(this.charts.length);
+
+
+   });
 
 
 
   }
 
-  ngOnInit(){
+  ngOnInit() {
     /*
       this.socket.subscribe(
         message => this.message = message.data
       );*/
     }
 
-  heatingTimed(event:Event){  
+  heatingTimed(event: Event) {
     event.preventDefault();
-    console.log('timeOff:' + this.timeOverride +' '+this.timeOverride.hours+' ' + this.timeOverride.minutes );
-      let now = new Date();
+    console.log('timeOff:' + this.timeOverride + ' ' + this.timeOverride.hours + ' ' + this.timeOverride.minutes );
+      const now = new Date();
       console.log('now:' + now);
       now.setHours(Number(String(this.timeOverride).split(':')[0]) );
       now.setMinutes(Number(String(this.timeOverride).split(':')[1]));
 
-      let headers = new Headers({ 'Content-Type': 'application/json' });
-      let options = new RequestOptions({ headers: headers });
+      const headers = new Headers({ 'Content-Type': 'application/json' });
+      const options = new RequestOptions({ headers: headers });
 
       console.log('dateOff:' + now);
 
-      this.http.post('http://' + AppComponent.localhostString + ':8080/api/override/', JSON.stringify( now.getTime()), options ).subscribe(res => { 
+      this.http.post('http://' + AppComponent.localhostString + ':8080/api/override/',
+      JSON.stringify( now.getTime()), options ).subscribe(res => {
         this.message = res.text();
-      })
+      });
 
   }
 
-switchHeating(doTurnOn: boolean){
-    let headers = new Headers({ 'Content-Type': 'application/json' });
-    let options = new RequestOptions({ headers: headers });
-  
-    this.http.post('http://'+ AppComponent.localhostString +':8080/api/switchheating/',  JSON.stringify( doTurnOn ), options ).subscribe(res => { 
+switchHeating(doTurnOn: boolean) {
+    const headers = new Headers({ 'Content-Type': 'application/json' });
+    const options = new RequestOptions({ headers: headers });
+
+    this.http.post('http://' + AppComponent.localhostString + ':8080/api/switchheating/',
+    JSON.stringify( doTurnOn ), options ).subscribe(res => {
       this.message = res.text();
-    })
+    });
 }
 
-toggleGarageDoor(){
-  let headers = new Headers({ 'Content-Type': 'application/json' });
-  let options = new RequestOptions({ headers: headers });
+toggleGarageDoor() {
+  const headers = new Headers({ 'Content-Type': 'application/json' });
+  const options = new RequestOptions({ headers: headers });
 
-  this.http.post('http://192.168.0.46/toggle',  JSON.stringify( '' ), options ).subscribe(res => { 
+  this.http.post('http://192.168.0.46/toggle',  JSON.stringify( '' ), options ).subscribe(res => {
     this.message = res.text();
-  })
+  });
 }
 
 
 }
 
 
-interface SensorValue{
+interface SensorValue {
   type: string;
   value: number;
   date: number;
+}
+interface Chart {
+  name: string;
+  chartOptions: any;
 }

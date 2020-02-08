@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import model.MeasureValueType;
 import model.MeasuredValue;
 import model.Message;
 
@@ -30,7 +29,9 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -346,13 +347,22 @@ public class Api {
 		double humidity = 0;
 		try {
 			JsonNode node = mapper.readTree(body);
+
+			System.out.println("Total Measures before:"+ HeatingbackendApplication.sensorValues.size());
+			Iterator<Entry<String, JsonNode>> fields = node.fields();
 		
-			temperature = node.get("temperature").asDouble();
-			humidity = node.get("humidity").asDouble();
-			System.out.println("Logging sensor value temperature:" + temperature +" humidity:"+ humidity +" Total Measures before:"+ HeatingbackendApplication.sensorValues.size());
-			
-			HeatingbackendApplication.sensorValues.add(new MeasuredValue(MeasureValueType.HUMIDITY, humidity));
-			HeatingbackendApplication.sensorValues.add(new MeasuredValue(MeasureValueType.TEMPERATURE, temperature));
+		    while (fields.hasNext()) {
+		        Entry<String, JsonNode> jsonField = fields.next();
+		        jsonField.getValue();
+		        
+		        HeatingbackendApplication.sensorValues.add(new MeasuredValue(jsonField.getKey(), jsonField.getValue().asDouble()));
+		        
+		        System.out.println("Logging sensor value temperature:" + jsonField.getKey() +" value:"+ jsonField.getValue().asDouble() +" Total Measures before:"+ HeatingbackendApplication.sensorValues.size());
+		    }
+
+		    
+		    System.out.println("Total Measures before:"+ HeatingbackendApplication.sensorValues.size());
+
 			System.out.println(" Total Measures after:"+ HeatingbackendApplication.sensorValues.size());
 			
 		
@@ -366,7 +376,7 @@ public class Api {
 					
 						
 						) {					
-					if (HeatingbackendApplication.sensorValues.get(t).getType().equals(MeasureValueType.TEMPERATURE)) {
+					if (HeatingbackendApplication.sensorValues.get(t).getType().toUpperCase().equals("TEMPERATURE")) {
 						averageTemperatureLastHour = averageTemperatureLastHour +  HeatingbackendApplication.sensorValues.get(t).getValue();
 						countTemperatureMeasuresLastHour++;
 					}
@@ -387,13 +397,13 @@ public class Api {
 				Api.switchHeating(HeatingbackendApplication.overrideState);			
 				HeatingbackendApplication.info="Heizung aufgrund Temperatur über 24 Grad aus bis "+Api.getDatefromSwitch(switchInOneHoure);
 				
-			}else if(averageTemperatureLastHour < 14) {
+			}else if(averageTemperatureLastHour < 12) {
 				HeatingbackendApplication.overrideState = true;
 				int switchInOneHoure = Api.getSwitchfromDate(new Date())+4;
 				HeatingbackendApplication.overrideUntilSwitch = switchInOneHoure;	
 				HeatingbackendApplication.overrideDay= new Date(new Date().getYear(), new Date().getMonth(), new Date().getDay());				
 				Api.switchHeating(HeatingbackendApplication.overrideState);			
-				HeatingbackendApplication.info="Heizung aufgrund Temperatur unter 14 Grad an bis "+Api.getDatefromSwitch(switchInOneHoure);
+				HeatingbackendApplication.info="Heizung aufgrund Temperatur unter 12 Grad an bis "+Api.getDatefromSwitch(switchInOneHoure);
 			}
 			
 			
@@ -405,7 +415,7 @@ public class Api {
 				if(HeatingbackendApplication.sensorValues.get(h).getDate().getTime()
 						>= ( new Date(new Date().getYear(), new Date().getMonth(), new Date().getDate(), new Date().getHours()-1, new Date().getMinutes()).getTime())) {
 					
-					 if (HeatingbackendApplication.sensorValues.get(h).getType().equals(MeasureValueType.HUMIDITY)) {
+					 if (HeatingbackendApplication.sensorValues.get(h).getType().toUpperCase().equals("HUMIDITY")) {
 						averageHumidityLastHour = averageHumidityLastHour +  HeatingbackendApplication.sensorValues.get(h).getValue();
 						countHumidityMeasuresLastHour++;
 					}
@@ -586,7 +596,7 @@ public class Api {
 			
 		int nowSwitch = Api.witchSwitchIsNow();
 				
-		if (new Date().getDay() != 0 && new Date().getDay() != 6) {
+		if (new Date().getDay() != 0 && new Date().getDay() != 6 && new Date().getDay() != 5) {
 			return "weekdays";
 		}else {
 			return "weekend";
