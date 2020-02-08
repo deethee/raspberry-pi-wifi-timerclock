@@ -1,7 +1,8 @@
 #include <WiFi.h>
+#include "arduino_secrets.h"
+const char* ssid = SECRET_SSID;
+const char* password = SECRET_PASS;
 
-const char* ssid     = "xxx";
-const char* password = "xxx";
 WiFiServer server(80);
 
 int signalPin = 22;

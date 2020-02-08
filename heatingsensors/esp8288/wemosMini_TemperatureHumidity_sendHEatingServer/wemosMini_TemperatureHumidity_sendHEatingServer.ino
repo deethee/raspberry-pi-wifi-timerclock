@@ -16,8 +16,10 @@ static char humidityTemp[7];
 //#include <ESP326WiFi.h>
 #include <ESP32HTTPClient.h>
 #include <WiFi.h>
-const char* ssid = "xxx";
-const char* password = "xxx";
+#include "arduino_secrets.h"
+const char* ssid = SECRET_SSID;
+const char* password = SECRET_PASS;
+
 
 const char* url = "http://192.168.0.37";
 const int port = 4200;
@@ -1040,4 +1042,3 @@ void printBufferLong(){
     lc.setRow(0,a,y);                       // Send row to relevent MAX7219 chip
   }
 }
-

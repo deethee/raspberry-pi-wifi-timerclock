@@ -1,8 +1,9 @@
 // Replace with your network credentials
-  const char* ssid     = "xxx";
-  const char* password = "xxx";
-  const char* iftttToken_TestInternetConnection =  "xxx";
-  const char* iftttToken_sendMailMissing = "xxx";
+#include "arduino_secrets.h"
+const char* ssid = SECRET_SSID;
+const char* password = SECRET_PASS;
+const char* iftttToken_TestInternetConnection =  IFTTT_TOKEN_INTERNETALIVE;
+const char* iftttToken_sendMailMissing = IFTTT_TOKEN_DADMISSING;
 
 
 // pins

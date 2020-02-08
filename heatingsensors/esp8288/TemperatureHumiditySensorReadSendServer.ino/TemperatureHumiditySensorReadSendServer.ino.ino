@@ -1,6 +1,7 @@
+#include "arduino_secrets.h"
+const char* ssid = SECRET_SSID;
+const char* password = SECRET_PASS;
 
-const char* ssid = "xxx";
-const char* password = "xxx";
 
 
 #include "DHT.h"

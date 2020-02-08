@@ -1,8 +1,11 @@
 #include <HTTPClient.h>
 #include <WiFi.h>
-// Replace with your network credentials
-const char* ssid     = "UPC9406652";
-const char* password = "300873170473";
+
+#include "arduino_secrets.h"
+const char* ssid = SECRET_SSID;
+const char* password = SECRET_PASS;
+
+
 
 
 #include "DHT.h"
