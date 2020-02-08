@@ -44,6 +44,6 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-src/assets/commercialHeater1.obj
-src/assets/commercialHeater3.obj
-src/assets/commercialHeater2.obj
+#src/assets/commercialHeater1.obj
+#src/assets/commercialHeater3.obj
+#src/assets/commercialHeater2.obj
