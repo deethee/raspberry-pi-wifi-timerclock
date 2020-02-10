@@ -710,5 +710,72 @@ public class Api {
 			return output.toString();
 
 		}
+		
+		
+		@RequestMapping(value="/api/togglegaragedoor")
+		public  String toggleGarageDoor() {		
+			try {
+			String prg = "#!/usr/bin/env python\n\nimport automationhat\n\nautomationhat.relay.one.on()";
+			BufferedWriter out = new BufferedWriter(new FileWriter("/home/pi/Pimoroni/automationhat/examples/relay_on.py"));
+			out.write(prg);
+			out.close();
+
+			String prg2 = "#!/usr/bin/env python\n\nimport automationhat\n\nautomationhat.relay.one.off()";
+			BufferedWriter out2 = new BufferedWriter(new FileWriter("/home/pi/Pimoroni/automationhat/examples/relay_off.py"));
+			out2.write(prg2);
+			out2.close();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			/** install autommation phat
+			 * 
+			 * sudo nano /etc/sudoers			 * 
+			 * add 
+			 * tomcat8 ALL = NOPASSWD: ALL
+			 * 
+			 * change python script comment   
+			 * # GPIO.cleanup() 
+			 * at /usr/lib/python2.7/dist-packages/__init__.py
+			 * 
+			 * https://forums.pimoroni.com/t/automation-hat-relay-operation/4528/2
+			 */
+	   		Api.executeCommand("sudo python /home/pi/Pimoroni/automationhat/examples/relay_on.py");
+	   		try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	   		Api.executeCommand("sudo python /home/pi/Pimoroni/automationhat/examples/relay_off.py");
+			return "toggled";
+		}
+
+	 
+	 
+		public static void executePythonScript(String pathScriptFile) {
+
+			try{
+
+				File f = new File(pathScriptFile);
+				System.out.println(f.getAbsolutePath() +" exists:"+ f.exists());
+				ProcessBuilder pb = new ProcessBuilder("python", pathScriptFile);
+				pb.redirectErrorStream(true);
+				Process p = pb.start();
+				
+				   for(String s:pb.command()){
+			            System.out.println(s);
+			        }
+				   	String line;
+					BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+					while ((line = in.readLine()) != null) {
+						  System.out.println(line);
+					}
+		
+				}catch(Exception e){System.out.println(e);}
+			
+			
+		}
 	
 }
