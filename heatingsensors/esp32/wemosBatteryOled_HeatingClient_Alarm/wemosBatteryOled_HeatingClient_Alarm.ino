@@ -114,7 +114,7 @@ void setup() {
 
   Serial.println();
   Serial.println("lastTemperature" + String(lastTemperature) ); 
-  if (lastTemperature - temperature > 4 && temperature < 22) {
+  if (lastTemperature - temperature > 2 && temperature < 22) {
     Serial.print("window open alarm");
     isAlarm = true;
     display.drawString(63, 14, "Fenster offen" );

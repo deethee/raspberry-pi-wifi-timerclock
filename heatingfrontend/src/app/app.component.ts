@@ -169,9 +169,9 @@ toggleGarageDoor() {
   const headers = new Headers({ 'Content-Type': 'application/json' });
   const options = new RequestOptions({ headers: headers });
 
-  this.http.post('http://192.168.0.46/toggle',  JSON.stringify( '' ), options ).subscribe(res => {
+  this.http.get('http://192.168.0.54:8080/api/togglegaragedoor',  options ).subscribe(res => {
     this.message = res.text();
-  });
+  })
 }
 
 
