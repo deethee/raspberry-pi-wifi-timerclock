@@ -500,6 +500,7 @@ public class Api {
 	 public static String readConfigFile(String config) {
 		 
 		String sCurrentLine = null;
+		System.out.println("Reading config file: timer_"+config +".json");
 	
 		 try (BufferedReader br = new BufferedReader(new FileReader(HeatingbackendApplication.timerConfigPath+"timer_"+config+".json"))) {
 			
@@ -584,7 +585,7 @@ public class Api {
 		
 		int nowSwitch = Api.witchSwitchIsNow();
 				
-		if (new Date().getDay() != 0 && new Date().getDay() != 6) {
+		if ("weekdays".equals( getTimeRangeTypeToday() ) ) {
 			return HeatingbackendApplication.switches.contains(nowSwitch);
 		}else {
 			return HeatingbackendApplication.switchesWeekend.contains(nowSwitch);
@@ -597,8 +598,10 @@ public class Api {
 		int nowSwitch = Api.witchSwitchIsNow();
 				
 		if (new Date().getDay() != 0 && new Date().getDay() != 6 && new Date().getDay() != 5) {
+			System.out.println("weekdays day: " + new Date().getDay());
 			return "weekdays";
 		}else {
+			System.out.println("weekend day: " + new Date().getDay());
 			return "weekend";
 		}		 
 
@@ -616,7 +619,7 @@ public class Api {
 			}else {
 		   		Api.executeCommand("gpio export 4 in");
 		   		HeatingbackendApplication.isHeatingOn = false;
-		   		System.out.println("Switched pi relay off");
+		   		
 			}
 	 }
 	 

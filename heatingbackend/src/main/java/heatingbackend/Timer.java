@@ -22,7 +22,8 @@ public class Timer {
   @Scheduled(fixedRate = 60000)
     public void reportCurrentTime() {        
         
-    	log.info("The time is now {}", dateFormat.format(new Date()));
+	  log.info("The time is now {}", dateFormat.format(new Date()));
+	  log.info("day:", new Date().getDay());
 
         Integer switchNumber = Api.witchSwitchIsNow();
     	

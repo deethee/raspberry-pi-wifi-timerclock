@@ -2,11 +2,11 @@
 // Oled wemos will not compile or upload with sensor connected !!!!!!!
 
 //pins
-int motionDetectionSignalPin = 34; // Analog 5V , A0, GND  
+int motionDetectionSignalPin = 34;//34; // Analog 5V , A0, GND  
 const int DHTPin = 2; // digital 3.3v, 2, GND
 uint8_t ledPin = 16; // Onboard LED reference
-uint8_t oledPin1 = 4; // Onboard LED reference
-uint8_t oledPin2 = 5; // Onboard LED reference
+uint8_t oledPin1 = 4; // Onboard OLED reference
+uint8_t oledPin2 = 5; // Onboard OLED reference
 int batteryPin = 13;// is the gpio pin not analog
 int buzzerPin = 15;
 
@@ -34,8 +34,10 @@ int resolution = 8;
 boolean isAlarm = false;
 
 // oled
+/* oled OFF 
 #include "SSD1306.h"
 SSD1306 display(0x3c, 5, 4); // instance for the OLED. Addr, SDA, SCL
+oled OFF */
 
 // deep sleep
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
@@ -51,35 +53,46 @@ void setupSensors() {
   Serial.begin(9600);
   digitalWrite(ledPin, HIGH);
   dht.begin();
-  pinMode(batteryPin, INPUT);
+  //pinMode(batteryPin, INPUT);
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
   pinMode(motionDetectionSignalPin, INPUT); 
+
+  // oled
+/* oled OFF
+  display.init(); // initialise the OLED
+  //display.flipScreenVertically(); // does what is says
+  display.setFont(ArialMT_Plain_16); // does what is says
+  // Set the origin of text to top left
+  display.setTextAlignment(TEXT_ALIGN_CENTER_BOTH);
+oled OFF */
   
   Serial.println();
   Serial.print("connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    delay(5000);
     Serial.print(".");
+/* oled OFF 
+    display.drawString(63, 14, "Kein Wifi"  );
+    display.drawString(63, 28, String(WiFi.status()) );
+    display.display();
+oled OFF */
   }
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-
+/* oled OFF
+  display.clear();
+oled OFF */
 
   // buzzer
   ledcSetup(buzzerPin, freq, resolution);
   ledcAttachPin(0, buzzerPin);
 
-  // oled
-  display.init(); // initialise the OLED
-  //display.flipScreenVertically(); // does what is says
-  display.setFont(ArialMT_Plain_16); // does what is says
-  // Set the origin of text to top left
-  display.setTextAlignment(TEXT_ALIGN_CENTER_BOTH);
+
 
   // wait for sensors initialize
   delay(5000);
@@ -93,38 +106,42 @@ void setup() {
   setupSensors(); 
 
   printOled();
- 
-  Serial.println("batteryVoltage " +String(batteryVoltage) );
-  if (batteryVoltage < 3.1 && batteryVoltage > 2.9 ) {
-    Serial.print("Low Voltage Alarm");    
-    display.drawString(63, 14, "Akku Laden" );
-     display.drawString(63, 14, "Volt->" + String(batteryVoltage, 2));
 
-       int motionDetectionValue = analogRead(motionDetectionSignalPin) ; 
-       Serial.print("motion: "); Serial.println(motionDetectionValue);
+  Serial.println("batteryVoltage " +String(batteryVoltage) );
+  if (batteryVoltage < 3.29 && batteryVoltage > 3.2 ) {
+    Serial.print("Low Voltage Alarm");    
+/* oled OFF
+    display.drawString(63, 14, "Akku Laden" );
+    display.drawString(63, 14, "Volt->" + String(batteryVoltage, 2));
+    display.display();
+*/
+    int motionDetectionValue = analogRead(motionDetectionSignalPin) ; 
+    Serial.print("motion: "); Serial.println(motionDetectionValue);
        
-      if (motionDetectionValue > 100){      
-        isAlarm = true;
-      }
+    if (motionDetectionValue > 100){      
+      isAlarm = true;
+    }
   }
-  if (batteryVoltage <= 2.9 ) {
+  if (batteryVoltage <= 3.2 ) {
     Serial.print("Shutdown Voltage");
     adc_power_off();
   }
 
   Serial.println();
   Serial.println("lastTemperature" + String(lastTemperature) ); 
-  if (lastTemperature - temperature > 2 && temperature < 22) {
+  if (lastTemperature - temperature > 1 && temperature < 22) {
     Serial.print("window open alarm");
     isAlarm = true;
+/* oled OFF
     display.drawString(63, 14, "Fenster offen" );
     display.drawString(63, 28, "Differenz T:" + String(temperature-lastTemperature, 2));
     display.display();
+oled OFF*/    
   }
 
 
   if (!isAlarm){ // goto deep sleep 
-     deepSleep();
+    deepSleep();
   } else {
     alarmLoop();
   }
@@ -141,12 +158,21 @@ void deepSleep(){
 void printOled(){
 
   // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 3.3V):
-  batteryVoltage = analogRead(batteryPin) * (3.3 / 4095.0);
+  // analogReadResolution(12);
+  int batteryPinValue = analogRead(batteryPin);
+  batteryVoltage = ( batteryPinValue * 3.3 / (4095));
+  Serial.println("volt:"+  String(batteryVoltage));
   temperature = dht.readTemperature();
   humidity = dht.readHumidity();
   
   if (isnan(temperature) || isnan(humidity)) {
       Serial.println("Failed to read from DHT");
+/* oled OFF
+      display.drawString(63, 16, "Sensor Failed" );
+      display.drawString(63, 35, "volt " + String(batteryVoltage));
+      display.display();
+oled OFF */
+
     } else {
       Serial.println("Temperature = "+String(temperature));
       Serial.println("Humidity = "+String(humidity));
@@ -156,22 +182,27 @@ void printOled(){
       http.POST("{\"temperature\":"+String(temperature)+",\"humidity\":"+String(humidity)+",\"battery\":"+String(batteryVoltage)+"}");
       http.writeToStream(&Serial);      
       http.end();    
+
+/* oled OFF 
+      // Upwards scroll OLED text
+      for(int8_t n = 112; n > 0; n--) {
+  
+          display.drawString(63, n+16, "Volt " + String(batteryVoltage, 2));
+          display.drawString(63, n+34, "Temperatur " + String(temperature, 2));
+          display.drawString(63, n+52, "Feuchtigkeit  " + String(humidity, 2));
+          display.display();
+          delay(10);
+          display.clear();
+      }
+    
+      delay(1000 *10);
+      display.clear();
+      display.display();
+*/      
+      
   }
   
-  // Upwards scroll OLED text
-  for(int8_t n = 112; n > 0; n--) {
-  //int8_t n = 0;
-      display.drawString(63, n+16, "Volt " + String(batteryVoltage, 2));
-      display.drawString(63, n+34, "Temperatur " + String(temperature, 2));
-      display.drawString(63, n+52, "Feuchtigkeit  " + String(humidity, 2));
-      display.display();
-      delay(10);
-      display.clear();
-  }
 
-  delay(1000 *10);
-  display.clear();
-  display.display();
   Serial.println("finished oled");
 }
 void alarmBuzz(){
@@ -200,6 +231,14 @@ void alarmLoop(){
       if (motionDetectionValue > 100){ 
         isAlarm = false;
         Serial.print("motion detected going deepsleep: "); Serial.println(motionDetectionValue);
+/* oled OFF           
+          display.drawString(63, 16, "Motion detected " + String(motionDetectionValue));
+          display.drawString(63, 34, "Alarm Off ");
+          display.drawString(63, 52, "Going sleep");
+          display.display();
+          delay(10);
+          display.clear();
+oled OFF */        
         deepSleep();
       } else{
         alarmBuzz();    
